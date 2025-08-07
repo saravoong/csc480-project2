@@ -6,9 +6,9 @@ import sys
 
 class Card:
     # Represents a single playing card 
-    RANKS = "23456789TJQKA"
-    SUITS = "cdhs"
-    RANK_VALUES = {rank: i for i, rank in enumerate(RANKS)}
+    ranks = "23456789TJQKA"
+    suits = "cdhs"
+    rank_values = {rank: i for i, rank in enumerate(ranks)}
 
     def __init__(self, card_str):
         if len(card_str) != 2:
@@ -16,10 +16,10 @@ class Card:
         self.rank_str = card_str[0].upper()
         self.suit_str = card_str[1].lower()
 
-        if self.rank_str not in self.RANKS or self.suit_str not in self.SUITS:
+        if self.rank_str not in self.ranks or self.suit_str not in self.suits:
             raise ValueError(f"Invalid card: {card_str}")
 
-        self.rank_value = self.RANK_VALUES[self.rank_str]
+        self.rank_value = self.rank_values[self.rank_str]
 
     def __str__(self):
         return self.rank_str + self.suit_str
@@ -35,7 +35,7 @@ class Card:
 
 # Helper functions for the deck
 def get_deck():
-    return [Card(r + s) for r in Card.RANKS for s in Card.SUITS]
+    return [Card(r + s) for r in Card.ranks for s in Card.suits]
 
 # Helper to determine if two hole cards are of the same suit
 def is_suited(card1, card2):
@@ -58,8 +58,8 @@ def evaluate_hand(five_cards):
     counts_list = sorted(rank_counts.values(), reverse=True)
     unique_ranks = sorted(rank_counts.keys(), reverse=True)
 
-    is_flush = any(suits.count(s) == 5 for s in Card.SUITS)
-    is_straight, straight_high_rank_value = _check_straight(ranks)
+    is_flush = any(suits.count(s) == 5 for s in Card.suits)
+    is_straight, straight_high_rank_value = check_straight(ranks)
 
     # Texas Hold’em hand ranking
     # 9: Straight Flush / Royal Flush
@@ -107,7 +107,7 @@ def evaluate_hand(five_cards):
     # 1: High Card
     return (1, *unique_ranks) # All 5 ranks for tie-breaking
 
-def _check_straight(ranks):
+def check_straight(ranks):
     # Identifies straights, returns the high card of the straight comparison
     # Checks for a straight in a list of 5 rank values.
     # Returns (True, high_rank_value) if a straight is found, otherwise (False, None).
@@ -127,10 +127,10 @@ def _check_straight(ranks):
 
     # Check for Ace-low straight (A, 2, 3, 4, 5)
     # Ranks: [0, 1, 2, 3, 12] (for 2,3,4,5,A)
-    ace_low_values = {Card.RANK_VALUES['2'], Card.RANK_VALUES['3'],
-                      Card.RANK_VALUES['4'], Card.RANK_VALUES['5'], Card.RANK_VALUES['A']}
+    ace_low_values = {Card.rank_values['2'], Card.rank_values['3'],
+                      Card.rank_values['4'], Card.rank_values['5'], Card.rank_values['A']}
     if set(unique_sorted_ranks) == ace_low_values:
-        return True, Card.RANK_VALUES['5'] # High card is 5 for A2345 straight
+        return True, Card.rank_values['5'] # High card is 5 for A2345 straight
 
     return False, None
 
@@ -293,7 +293,7 @@ def mcts(root_state, n_sim=1000):
 
 def lookup_preflop_table(card1, card2):
     # Ensure card ranks are sorted for consistent lookup
-    r1, r2 = sorted([card1.rank_str, card2.rank_str], key=lambda r: Card.RANK_VALUES[r], reverse=True)
+    r1, r2 = sorted([card1.rank_str, card2.rank_str], key=lambda r: Card.rank_values[r], reverse=True)
     suited = is_suited(card1, card2)
     if r1 == r2:
         key = (r1, r2, True)  # force suited to match existing table entry
