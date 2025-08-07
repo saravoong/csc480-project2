@@ -125,8 +125,6 @@ def check_straight(ranks):
     if is_regular_straight:
         return True, unique_sorted_ranks[-1] # High card of the straight
 
-    # Check for Ace-low straight (A, 2, 3, 4, 5)
-    # Ranks: [0, 1, 2, 3, 12] (for 2,3,4,5,A)
     ace_low_values = {Card.rank_values['2'], Card.rank_values['3'],
                       Card.rank_values['4'], Card.rank_values['5'], Card.rank_values['A']}
     if set(unique_sorted_ranks) == ace_low_values:
