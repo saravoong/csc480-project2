@@ -2,6 +2,7 @@ import random
 import math
 from itertools import combinations
 from collections import Counter
+import sys
 
 class Card:
     # Represents a single playing card 
@@ -11,7 +12,7 @@ class Card:
 
     def __init__(self, card_str):
         if len(card_str) != 2:
-            raise ValueError("Card string must be 2 characters (e.g., 'As', 'Th')")
+            raise ValueError("Card string must be 2 characters")
         self.rank_str = card_str[0].upper()
         self.suit_str = card_str[1].lower()
 
@@ -60,6 +61,7 @@ def evaluate_hand(five_cards):
     is_flush = any(suits.count(s) == 5 for s in Card.SUITS)
     is_straight, straight_high_rank_value = _check_straight(ranks)
 
+    # Texas Hold’em hand ranking
     # 9: Straight Flush / Royal Flush
     if is_flush and is_straight:
         return (9, straight_high_rank_value)
@@ -133,19 +135,12 @@ def _check_straight(ranks):
     return False, None
 
 def find_best_5_card_hand(hole_cards, community_cards):
-    # Finds the best 5-card poker hand from 7 cards (2 hole, 5 community).
     all_7_cards = hole_cards + community_cards
-    if len(all_7_cards) < 5: # Not enough cards to form a 5-card hand
+    if len(all_7_cards) < 5:
         return None
-
-    best_score = (0,) # Initialize with the lowest possible hand score (high card 2)
-
-    # Iterate through all combinations of 5 cards from the 7 available
-    for combo in combinations(all_7_cards, 5):
-        current_score = evaluate_hand(list(combo))
-        if current_score > best_score:
-            best_score = current_score
-    return best_score
+    
+     # Iterate through all combinations of 5 cards from the 7 available
+    return max(evaluate_hand(list(combo)) for combo in combinations(all_7_cards, 5))
 
 class MCTSNode:
     # Represents a node in the Monte Carlo Tree Search tree
@@ -335,12 +330,19 @@ def lookup_preflop_table(card1, card2):
     
     return table.get(key, None)
 
-my_cards = [Card('Ks'), Card('Jd')]
-mcts_solver_state = PokerState(my_cards)
-estimated_win_probability = mcts(mcts_solver_state, n_sim=1000)
-print(f"Estimated Win Probability: {estimated_win_probability:.2%}")
-expected_from_table = lookup_preflop_table(my_cards[0], my_cards[1])
-if expected_from_table is not None:
-    print(f"Expected from table: {expected_from_table}%")
-else:
-    print("No exact match in table for these cards (check table data or card order).")
+if __name__ == "__main__":
+    if len(sys.argv) != 3:
+        print("Wrong number of arguments, run the program: \npython3 planner.py [Card #1 (e.g. Ks)] [Card #1 (e.g. Jd)]")
+        sys.exit(1)
+
+    card1 = sys.argv[1]
+    card2 = sys.argv[2]
+    my_cards = [Card(card1), Card(card2)]
+    mcts_solver_state = PokerState(my_cards)
+    estimated_win_probability = mcts(mcts_solver_state, n_sim=1000)
+    print(f"Estimated Win Probability: {estimated_win_probability:.2%}")
+    expected_from_table = lookup_preflop_table(my_cards[0], my_cards[1])
+    if expected_from_table is not None:
+        print(f"Expected from table: {expected_from_table}%")
+    else:
+        print("No exact match in table for these cards (check table data or card order).")
